@@ -19,6 +19,9 @@ public class MainWindow : Window, IDisposable
     private readonly uint DarkGrey;
     public readonly Queue<(uint Normal, uint Opacity)> Colors;
 
+    private long LastHighlightedEventId;
+    private long HighlightedEventId;
+
     public MainWindow(Plugin plugin) : base("Eventy##Eventy")
     {
         Plugin = plugin;
@@ -134,6 +137,10 @@ public class MainWindow : Window, IDisposable
 
         var currentDay = DateTime.Now;
         var dayOfWeek = (int)new DateTime(CurrentDate.Year, CurrentDate.Month, 1).DayOfWeek;
+
+        LastHighlightedEventId = HighlightedEventId;
+        HighlightedEventId = 0;
+
         for (var dw = 0; dw < 7; dw++)
         {
             using (ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, Vector2.Zero))
@@ -232,7 +239,11 @@ public class MainWindow : Window, IDisposable
                 var lineMin = min with { Y = min.Y + spacing };
                 var lineMax = max with { Y = min.Y + spacing + 5.0f * ImGuiHelpers.GlobalScale };
 
-                drawList.AddRectFilled(lineMin, lineMax, currentMonth ? ev.Color : ev.Opacity);
+                var evCol = currentMonth ? ev.Color : ev.Opacity;
+                if (ev.Id == LastHighlightedEventId)
+                    evCol = Brighten(evCol, Ease(0.3f, 0.7f, 1d));
+
+                drawList.AddRectFilled(lineMin, lineMax, evCol);
 
                 ImGui.SetCursorScreenPos(lineMin);
                 if (ImGui.InvisibleButton($"##event{ev.Id}", lineMax - lineMin) && ev.Url != "")
@@ -243,6 +254,7 @@ public class MainWindow : Window, IDisposable
                     using var textColor = ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudGrey);
                     ImGui.SetTooltip($"{ev.Name}\n{ev.Begin:f} - {ev.End:f}");
                     ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+                    HighlightedEventId = ev.Id;
                 }
             }
         }
@@ -257,5 +269,26 @@ public class MainWindow : Window, IDisposable
     {
         drawList.AddRectFilled(min, max, fillColor);
         drawList.AddRect(min, max, borderColor);
+    }
+
+    private static uint Brighten(uint color, float factor)
+    {
+        var a = (color >> 24) & 0xFF;
+        var b = (color >> 16) & 0xFF;
+        var g = (color >> 8) & 0xFF;
+        var r = color & 0xFF;
+
+        b = (byte)(b + (255 - b) * factor);
+        g = (byte)(g + (255 - g) * factor);
+        r = (byte)(r + (255 - r) * factor);
+
+        return (a << 24) | (b << 16) | (g << 8) | r;
+    }
+
+    private static float Ease(float min, float max, double hz)
+    {
+        var t = ImGui.GetTime() * hz % 1.0;
+        var d = (float)(Math.Sin(t * Math.PI * 2) * 0.5 + 0.5);
+        return min + d * (max - min);
     }
 }
