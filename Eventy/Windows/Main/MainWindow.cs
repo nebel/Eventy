@@ -243,7 +243,10 @@ public class MainWindow : Window, IDisposable
                 if (ev.Id == LastHighlightedEventId)
                     evCol = Brighten(evCol, Ease(0.3f, 0.7f, 1d));
 
-                drawList.AddRectFilled(lineMin, lineMax, evCol);
+                if (ev.IsPvP)
+                    DrawRectZigzag(drawList, lineMin, lineMax, evCol, 5f);
+                else
+                    drawList.AddRectFilled(lineMin, lineMax, evCol);
 
                 ImGui.SetCursorScreenPos(lineMin);
                 if (ImGui.InvisibleButton($"##event{ev.Id}", lineMax - lineMin) && ev.Url != "")
@@ -290,5 +293,43 @@ public class MainWindow : Window, IDisposable
         var t = ImGui.GetTime() * hz % 1.0;
         var d = (float)(Math.Sin(t * Math.PI * 2) * 0.5 + 0.5);
         return min + d * (max - min);
+    }
+
+    private static void DrawRectZigzag(ImDrawListPtr drawList, Vector2 lineMin, Vector2 lineMax, uint color,
+        float step = 10f, float thickness = 1.25f)
+    {
+        var top = lineMin.Y + 0.5f;
+        var bottom = lineMax.Y - 0.5f;
+        var width = lineMax.X - lineMin.X;
+        var steps = (int)MathF.Ceiling(width / step) + 1;
+
+        drawList.AddRectFilled(lineMin, lineMax, MultiplyAlpha(color, 0.33f));
+
+        drawList.PathClear();
+
+        for (var i = 0; i < steps; i++)
+        {
+            var x = lineMin.X + i * step;
+            if (x <= lineMax.X)
+            {
+                drawList.PathLineTo(new Vector2(x, i % 2 == 0 ? top : bottom));
+                continue;
+            }
+
+            var fraction = (x - lineMax.X) / step;
+            var y = i % 2 == 0
+                ? top + fraction * (bottom - top)
+                : bottom - fraction * (bottom - top);
+
+            drawList.PathLineTo(lineMax with { Y = y });
+        }
+
+        drawList.PathStroke(color, ImDrawFlags.None, thickness);
+    }
+
+    private static uint MultiplyAlpha(uint color, float multiplier)
+    {
+        var alpha = (uint)((color >> 24) * Math.Clamp(multiplier, 0f, 1f));
+        return color & 0x00FFFFFF | alpha << 24;
     }
 }
