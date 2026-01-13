@@ -241,7 +241,7 @@ public class MainWindow : Window, IDisposable
 
                 var evCol = currentMonth ? ev.Color : ev.Opacity;
                 if (ev.Id == LastHighlightedEventId)
-                    evCol = Brighten(evCol, Ease(0.3f, 0.7f, 1d));
+                    evCol = PulseBrightness(evCol, 0.5f, Ease(0, 1, 1));
 
                 if (ev.IsPvP)
                     DrawRectZigzag(drawList, lineMin, lineMax, evCol, 5f);
@@ -274,25 +274,25 @@ public class MainWindow : Window, IDisposable
         drawList.AddRect(min, max, borderColor);
     }
 
-    private static uint Brighten(uint color, float factor)
+    private static uint PulseBrightness(uint color, float limit, float interval)
     {
-        var a = (color >> 24) & 0xFF;
-        var b = (color >> 16) & 0xFF;
-        var g = (color >> 8) & 0xFF;
-        var r = color & 0xFF;
+        var t = (interval * 2f - 1f) * limit;
+        var scale = 1f - Math.Abs(t);
+        var offset = t > 0 ? 255f * t : 0f;
 
-        b = (byte)(b + (255 - b) * factor);
-        g = (byte)(g + (255 - g) * factor);
-        r = (byte)(r + (255 - r) * factor);
+        return color & 0xFF000000
+               | Pulse(color >> 16 & 0xFF) << 16
+               | Pulse(color >> 8 & 0xFF) << 8
+               | Pulse(color & 0xFF);
 
-        return (a << 24) | (b << 16) | (g << 8) | r;
+        uint Pulse(uint c) => (uint)Math.Clamp(c * scale + offset, 0f, 255f);
     }
 
     private static float Ease(float min, float max, double hz)
     {
-        var t = ImGui.GetTime() * hz % 1.0;
-        var d = (float)(Math.Sin(t * Math.PI * 2) * 0.5 + 0.5);
-        return min + d * (max - min);
+        var t = (float)(ImGui.GetTime() * hz % 1.0);
+        var d = MathF.Sin(t * MathF.Tau) * 0.5f + 0.5f;
+        return min + (max - min) * d;
     }
 
     private static void DrawRectZigzag(ImDrawListPtr drawList, Vector2 lineMin, Vector2 lineMax, uint color,
@@ -324,8 +324,8 @@ public class MainWindow : Window, IDisposable
 
     private static uint MultiplyAlpha(uint color, float multiplier)
     {
-        var o = (color >> 24) & 0xFF;
+        var o = color >> 24 & 0xFF;
         var n = Math.Clamp(multiplier, 0f, 1f) * o;
-        return (color & 0x00FFFFFF) | ((uint)n << 24);
+        return color & 0x00FFFFFF | (uint)n << 24;
     }
 }
