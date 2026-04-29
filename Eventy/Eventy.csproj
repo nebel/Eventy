@@ -1,21 +1,8 @@
-<Project Sdk="Dalamud.NET.Sdk/14.0.1">
+<Project Sdk="Dalamud.NET.Sdk/15.0.0">
 	<PropertyGroup>
 		<Authors>Infi</Authors>
-		<Version>1.0.6.0</Version>
-		<Description>Never forget a seasonal event ever again</Description>
+		<Version>1.0.7.0</Version>
 		<PackageProjectUrl>https://github.com/Infiziert90/Eventy</PackageProjectUrl>
-	</PropertyGroup>
-
-	<PropertyGroup>
-		<TargetFramework>net10.0-windows</TargetFramework>
-		<Platforms>x64</Platforms>
-		<Nullable>enable</Nullable>
-		<LangVersion>latest</LangVersion>
-		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-		<ProduceReferenceAssembly>false</ProduceReferenceAssembly>
-		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 	</PropertyGroup>
 
 	<ItemGroup>

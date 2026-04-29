@@ -93,7 +93,7 @@ public class Plugin : IDalamudPlugin
             if (file.Exists)
             {
                 using var reader = new StreamReader(file.FullName);
-                storedJson = reader.ReadToEnd();
+                storedJson = await reader.ReadToEndAsync();
             }
 
             var response = await Updater.GetEvents(0);

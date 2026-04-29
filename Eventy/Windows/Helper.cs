@@ -6,17 +6,6 @@ namespace Eventy.Windows;
 public static class Helper
 {
     /// <summary>
-    /// An unformatted version for ImGui.TextColored
-    /// </summary>
-    /// <param name="color">color to be used</param>
-    /// <param name="text">text to display</param>
-    public static void TextColored(Vector4 color, string text)
-    {
-        using (ImRaii.PushColor(ImGuiCol.Text, color))
-            ImGui.TextUnformatted(text);
-    }
-    
-    /// <summary>
     /// An unformatted version for ImGui.TextWrapped
     /// </summary>
     /// <param name="text">text to display</param>
@@ -25,7 +14,7 @@ public static class Helper
         using (ImRaii.TextWrapPos(0.0f))
             ImGui.TextUnformatted(text);
     }
-    
+
     /// <summary>
     /// An unformatted version for ImGui.TextWrapped with color
     /// </summary>
@@ -35,17 +24,6 @@ public static class Helper
     {
         using (ImRaii.PushColor(ImGuiCol.Text, color))
             TextWrapped(text);
-    }
-    
-    public static bool Button(string id, FontAwesomeIcon icon, bool disabled)
-    {
-        var clicked = false;
-
-        using var pushedDisabled = ImRaii.Disabled(disabled);
-        if (ImGuiComponents.IconButton(id, icon))
-            clicked = true;
-
-        return clicked;
     }
 
     private static float Saturate(float f) => f < 0.0f ? 0.0f : f > 1.0f ? 1.0f : f;

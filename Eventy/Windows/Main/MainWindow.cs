@@ -34,7 +34,7 @@ public class MainWindow : Window, IDisposable
             (Helper.Vec4ToUintColor(ImGuiColors.ParsedPink), Helper.Vec4ToUintColor(ImGuiColors.ParsedPink with {W = 0.5f})),
             (Helper.Vec4ToUintColor(ImGuiColors.ParsedGold), Helper.Vec4ToUintColor(ImGuiColors.ParsedGold with {W = 0.5f})),
             (Helper.Vec4ToUintColor(ImGuiColors.DPSRed), Helper.Vec4ToUintColor(ImGuiColors.DPSRed with {W = 0.5f})),
-            (Helper.Vec4ToUintColor(ImGuiColors.DalamudYellow), Helper.Vec4ToUintColor(ImGuiColors.DalamudYellow with {W = 0.5f})),
+            (Helper.Vec4ToUintColor(ImGuiColors.DalamudYellow), Helper.Vec4ToUintColor(ImGuiColors.DalamudYellow with {W = 0.5f}))
         ]);
 
         DarkGrey = Helper.Vec4ToUintColor(ImGuiColors.DalamudGrey3);
@@ -87,11 +87,11 @@ public class MainWindow : Window, IDisposable
             var color = ImGui.GetColorU32(style.Colors[(int)ImGuiCol.Text]);
             var monthWidth = MonthWidths[CurrentDate.Month - 1];
             var pos = ImGui.GetCursorScreenPos();
-            pos = pos with { X = pos.X + ((LongestMonthWidth - monthWidth) * 0.5f) };
+            pos = pos with { X = pos.X + (LongestMonthWidth - monthWidth) * 0.5f };
 
             drawlist.AddText(pos, color, MonthNames[CurrentDate.Month - 1]);
 
-            ImGui.SameLine(0, LongestMonthWidth + (style.ItemSpacing.X * 2));
+            ImGui.SameLine(0, LongestMonthWidth + style.ItemSpacing.X * 2);
 
             if (ImGui.SmallButton(arrowRight))
                 CurrentDate = CurrentDate.AddMonths(1);
@@ -102,9 +102,9 @@ public class MainWindow : Window, IDisposable
         var centerOffset = (ImGui.GetWindowWidth() - todayWidth) * 0.5f;
         ImGui.SameLine(centerOffset);
         if (ImGui.SmallButton(todayString))
-            CurrentDate = new(DateTime.Now.Year, DateTime.Now.Month, 1);
+            CurrentDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
 
-        ImGui.SameLine(ImGui.GetWindowWidth() - yearPartWidth - style.WindowPadding.X - (style.ItemSpacing.X * 3.0f));
+        ImGui.SameLine(ImGui.GetWindowWidth() - yearPartWidth - style.WindowPadding.X - style.ItemSpacing.X * 3.0f);
 
         using (ImRaii.PushId(1235))
         {
@@ -127,7 +127,7 @@ public class MainWindow : Window, IDisposable
         if (maxDayOfCurMonth == 28)
         {
             var year = CurrentDate.Year;
-            var bis = ((year % 4) == 0) && ((year % 100) != 0 || (year % 400) == 0);
+            var bis = year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
             if (bis)
                 maxDayOfCurMonth = 29;
         }
@@ -136,7 +136,7 @@ public class MainWindow : Window, IDisposable
         var dayOfWeek = (int)new DateTime(CurrentDate.Year, CurrentDate.Month, 1).DayOfWeek;
         for (var dw = 0; dw < 7; dw++)
         {
-            using (ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, new Vector2(0,0)))
+            using (ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, Vector2.Zero))
             using (ImRaii.Group())
             {
                 using var textColor = ImRaii.PushColor(ImGuiCol.Text, CalculateTextColor(true), dw == 0);
@@ -151,7 +151,7 @@ public class MainWindow : Window, IDisposable
                 var curDay = dw - dayOfWeek;
                 for (var row = 0; row < 7; row++)
                 {
-                    var cday = curDay + (7 * row);
+                    var cday = curDay + 7 * row;
                     if (cday - dw > maxDayOfCurMonth)
                         continue;
 
@@ -171,7 +171,7 @@ public class MainWindow : Window, IDisposable
                     var textWidth = ImGui.CalcTextSize(text).X;
                     var spacing = 5.0f * ImGuiHelpers.GlobalScale;
 
-                    pos = pos with { X = pos.X + spacing + ((sampleWidth - textWidth) * 0.5f) };
+                    pos = pos with { X = pos.X + spacing + (sampleWidth - textWidth) * 0.5f };
                     var color = Helper.Vec4ToUintColor(dw != 0 ? ImGuiColors.DalamudGrey with {W = currentMonth ? 1 : 0.5f} : CalculateTextColor(currentMonth));
                     drawlist.AddText(pos, color, text);
                 }
@@ -181,7 +181,7 @@ public class MainWindow : Window, IDisposable
             }
 
             if (dw != 6)
-                ImGui.SameLine((FieldSize.X * (dw + 1)) + ImGui.GetStyle().ItemSpacing.X);
+                ImGui.SameLine(FieldSize.X * (dw + 1) + ImGui.GetStyle().ItemSpacing.X);
         }
     }
 
@@ -230,7 +230,7 @@ public class MainWindow : Window, IDisposable
             {
                 var spacing = ev.Spacing * ImGuiHelpers.GlobalScale;
                 var lineMin = min with { Y = min.Y + spacing };
-                var lineMax = max with { Y = min.Y + spacing + (5.0f * ImGuiHelpers.GlobalScale) };
+                var lineMax = max with { Y = min.Y + spacing + 5.0f * ImGuiHelpers.GlobalScale };
 
                 drawList.AddRectFilled(lineMin, lineMax, currentMonth ? ev.Color : ev.Opacity);
 
