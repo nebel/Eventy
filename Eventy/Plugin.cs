@@ -132,10 +132,10 @@ public class Plugin : IDalamudPlugin
                     Color = color.Normal,
                     Opacity = color.Opacity,
 
-                    Spacing = 20.0f // initial spacing
+                    Spacing = 17.0f // initial spacing
                 };
 
-                foreach (var (day, idx) in Utils.EachDay(ev.Begin, ev.End).WithIndex())
+                foreach (var (idx, day) in Utils.EachDay(ev.Begin, ev.End).Index())
                 {
                     eventDay.IsFirst = idx == 0;
                     if (!dict.TryAdd(day.Ticks, [eventDay]))
@@ -146,18 +146,15 @@ public class Plugin : IDalamudPlugin
                         if (eventDay.IsFirst)
                         {
                             // Check if space above is free else set spacing to +10.0f of current
-                            foreach (var (entry, iidx) in entries.WithIndex())
+                            while (eventDay.Spacing < 80.0f)
                             {
-                                var spacing = 20.0f + (10.0f * iidx);
-                                if (entry.Spacing > spacing)
-                                {
-                                    eventDay.Spacing = spacing;
+                                if (entries.All(e => (int)e.Spacing != (int)eventDay.Spacing))
                                     break;
-                                }
 
-                                eventDay.Spacing = entry.Spacing + 10.0f;
+                                eventDay.Spacing += 10.0f;
                             }
                         }
+
                         dict[day.Ticks] = entries.Append(eventDay).ToArray();
                     }
                 }

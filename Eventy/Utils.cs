@@ -34,11 +34,6 @@ public static class Utils
 
 public static class Extensions
 {
-    public static IEnumerable<(T Val, int Idx)> WithIndex<T>(this IEnumerable<T> list)
-    {
-        return list.Select((val, idx) => (val, idx));
-    }
-
     public static string ToName(this Subdomain subdomain)
     {
         return subdomain switch
